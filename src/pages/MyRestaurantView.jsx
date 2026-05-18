@@ -1,0 +1,129 @@
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import {
+  fetchRestaurantByIdWithReviews,
+  deleteRestaurant,
+  updateRestaurant,
+} from "../services/apiRestaurants";
+import { FilePenLine, Trash2 } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
+import { toast } from "react-toastify";
+import { FormRow, LoadingButton, RatingStars } from "./Utils";
+import AddReviewForm from "../components/AddReviewForm";
+import Reviews from "../components/Reviews";
+import AddRestaurantForm from "../components/AddRestaurantForm";
+import { useState } from "react";
+import { SkeletonCard } from "../components/LOader";
+
+function MyRestaurantView() {
+  const [isEditing, setIsEditing] = useState(false);
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const { role } = useAuth();
+  const {
+    data: restaurant,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["restaurant", id],
+    queryFn: () => fetchRestaurantByIdWithReviews(id),
+  });
+
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending: isUpdatePending } = useMutation({
+    mutationFn: updateRestaurant,
+    onSuccess: () => {
+      toast.success("Successfully updated restaurant!");
+      queryClient.invalidateQueries({ queryKey: ["own-restaurants"] });
+      queryClient.invalidateQueries({ queryKey: ["restaurant", id] });
+      setIsEditing(false);
+    },
+    onError: (error) => {
+      toast.error("Failed to add restaurant. Please try again.");
+      console.error("Add restaurant error:", error);
+    },
+  });
+
+  const { mutate: DeleteRestaurant, isPending: isDeletePending } = useMutation({
+    mutationFn: () => deleteRestaurant(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["restaurant", id],
+      });
+      toast.info("Deleted restaurant successfully");
+      navigate("/my-restaurants");
+    },
+    onError: (error) => {
+      toast.error("Failed to delete restaurant. Please try again.");
+      console.error("Delete restaurant error:", error);
+    },
+  });
+
+  if (isLoading) return <SkeletonCard />;
+  if (isError) {
+    toast.error("Unable to fetch restaurant details.");
+    return;
+  }
+
+  function submitDeleteRestaurant() {
+    DeleteRestaurant();
+  }
+
+  return (
+    <section className="w-full">
+      {isEditing ? (
+        <AddRestaurantForm
+          mutate={mutate}
+          isPending={isUpdatePending}
+          data={restaurant}
+          update={true}
+          setIsEditing={setIsEditing}
+        />
+      ) : (
+        <>
+          <div className="flex gap-3">
+            <p className="text-4xl text-black/80 font-bold capitalize">
+              {restaurant.name}
+            </p>
+            <RatingStars rating={restaurant.averageRating} />
+          </div>
+          <p className="mb-2 font-bold text-black/70">{restaurant.city}</p>
+          <div className="flex flex-col min-[850px]:flex-row gap-4 items-center">
+            <img
+              className="w-[500px] min-[851px]:max-[950px]:w-[370px] object-cover h-auto max-w-full rounded-lg shrink-0"
+              src={restaurant.image_url}
+              alt={restaurant.name}
+            />
+            <p className="text-justify font-semibold">
+              {restaurant.description}
+            </p>
+          </div>
+          {role == "owner" && (
+            <div className="flex justify-end gap-3">
+              <button
+                className="flex gap-1 border border-none bg-green-600 px-5 py-1 rounded-xl text-white font-bold hover:bg-green-700"
+                onClick={() => setIsEditing(true)}
+              >
+                <FilePenLine className="w-4" />
+                Edit
+              </button>
+              <button
+                className="flex gap-1 border border-none bg-red-600 px-5 py-1 rounded-xl text-white font-bold hover:bg-red-700"
+                onClick={submitDeleteRestaurant}
+                disabled={isDeletePending}
+              >
+                <Trash2 className="w-4" />
+                Delete Restaurant
+              </button>
+            </div>
+          )}
+        </>
+      )}
+      <p className="my-6 text-2xl font-bold text-black/80">Reviews</p>
+      <Reviews restaurantData={restaurant} />
+    </section>
+  );
+}
+
+export default MyRestaurantView;
