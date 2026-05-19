@@ -92,10 +92,9 @@ async function fetchRestaurantByIdWithReviews(id) {
       "*,owner:users!owner_id(name), reviews(rating, comment, reviewer_id, created_at, reviewer:users!reviewer_id(name))",
     )
     .eq("id", id)
-    .single();
-  if (error) {
-    throw error;
-  }
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error("Restaurant not found.");
 
   if (data.reviews) {
     if (!Array.isArray(data.reviews)) {

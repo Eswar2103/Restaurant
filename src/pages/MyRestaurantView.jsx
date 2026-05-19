@@ -12,7 +12,7 @@ import { FormRow, LoadingButton, RatingStars } from "./Utils";
 import AddReviewForm from "../components/AddReviewForm";
 import Reviews from "../components/Reviews";
 import AddRestaurantForm from "../components/AddRestaurantForm";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SkeletonCard } from "../components/Loader";
 import GetConfirmation from "../components/GetConfirmation";
 
@@ -26,6 +26,7 @@ function MyRestaurantView() {
     data: restaurant,
     isLoading,
     isError,
+    error,
   } = useQuery({
     queryKey: ["restaurant", id],
     queryFn: () => fetchRestaurantByIdWithReviews(id),
@@ -37,9 +38,9 @@ function MyRestaurantView() {
     mutationFn: updateRestaurant,
     onSuccess: () => {
       toast.success("Successfully updated restaurant!");
+      setIsEditing(false);
       queryClient.invalidateQueries({ queryKey: ["own-restaurants"] });
       queryClient.invalidateQueries({ queryKey: ["restaurant", id] });
-      setIsEditing(false);
     },
     onError: (error) => {
       toast.error("Failed to add restaurant. Please try again.");
@@ -49,10 +50,8 @@ function MyRestaurantView() {
 
   const { mutate: DeleteRestaurant, isPending: isDeletePending } = useMutation({
     mutationFn: () => deleteRestaurant(id),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["restaurant", id],
-      });
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: ["restaurant", id] });
       toast.info("Deleted restaurant successfully");
       navigate("/my-restaurants");
     },
@@ -62,11 +61,14 @@ function MyRestaurantView() {
     },
   });
 
+  useEffect(() => {
+    if (isError) toast.error("Unable to fetch restaurant details.");
+  }, [isError]);
+
   if (isLoading) return <SkeletonCard />;
-  if (isError) {
-    toast.error("Unable to fetch restaurant details.");
-    return;
-  }
+  if (isError) return null;
+
+  console.log("Fetch error:", error);
 
   function submitDeleteRestaurant() {
     // DeleteRestaurant();
@@ -105,8 +107,9 @@ function MyRestaurantView() {
           {role == "owner" && (
             <div className="flex justify-end gap-3">
               <button
-                className="flex gap-1 border border-none bg-green-600 px-5 py-1 rounded-xl text-white font-bold hover:bg-green-700"
+                className="flex gap-1 border border-none bg-green-600 px-5 py-1 rounded-xl text-white font-bold hover:bg-green-700 disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-50"
                 onClick={() => setIsEditing(true)}
+                disabled={isDelete}
               >
                 <FilePenLine className="w-4" />
                 Edit

@@ -98,8 +98,9 @@ function ReviewCardEdit({ review }) {
       <ReviewCard review={review}>
         <div className="flex justify-end gap-3">
           <button
-            className="flex gap-1 border border-none bg-green-600 px-5 py-1 rounded-xl text-white font-bold hover:bg-green-700"
+            className="flex gap-1 border border-none bg-green-600 px-5 py-1 rounded-xl text-white font-bold hover:bg-green-700 disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-50"
             onClick={() => setIsEditing(true)}
+            disabled={isDelete}
           >
             <FilePenLine className="w-4" />
             Edit
