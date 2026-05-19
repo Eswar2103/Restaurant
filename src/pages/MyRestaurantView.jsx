@@ -13,10 +13,12 @@ import AddReviewForm from "../components/AddReviewForm";
 import Reviews from "../components/Reviews";
 import AddRestaurantForm from "../components/AddRestaurantForm";
 import { useState } from "react";
-import { SkeletonCard } from "../components/LOader";
+import { SkeletonCard } from "../components/Loader";
+import GetConfirmation from "../components/GetConfirmation";
 
 function MyRestaurantView() {
   const [isEditing, setIsEditing] = useState(false);
+  const [isDelete, setIsDelete] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
   const { role } = useAuth();
@@ -67,7 +69,8 @@ function MyRestaurantView() {
   }
 
   function submitDeleteRestaurant() {
-    DeleteRestaurant();
+    // DeleteRestaurant();
+    setIsDelete(true);
   }
 
   return (
@@ -109,9 +112,9 @@ function MyRestaurantView() {
                 Edit
               </button>
               <button
-                className="flex gap-1 border border-none bg-red-600 px-5 py-1 rounded-xl text-white font-bold hover:bg-red-700"
+                className="flex gap-1 border border-none bg-red-600 px-5 py-1 rounded-xl text-white font-bold hover:bg-red-700 disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-50"
                 onClick={submitDeleteRestaurant}
-                disabled={isDeletePending}
+                disabled={isDeletePending || isDelete}
               >
                 <Trash2 className="w-4" />
                 Delete Restaurant
@@ -119,6 +122,13 @@ function MyRestaurantView() {
             </div>
           )}
         </>
+      )}
+      {isDelete && (
+        <GetConfirmation
+          mutate={DeleteRestaurant}
+          setIsDelete={setIsDelete}
+          text="restaurant"
+        />
       )}
       <p className="my-6 text-2xl font-bold text-black/80">Reviews</p>
       <Reviews restaurantData={restaurant} />

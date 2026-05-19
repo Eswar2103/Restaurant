@@ -1,13 +1,14 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FormRow, LoadingButton, RatingStars } from "../pages/Utils";
 import { useState } from "react";
+import { toast } from "react-toastify";
 import AddReviewForm from "../components/AddReviewForm";
 import { FilePenLine, Trash2 } from "lucide-react";
 import { useAuth } from "../context/useAuth";
 import { computeDate } from "../services/utils";
 import { deleteReview } from "../services/apiRestaurants";
 import { Link, useParams } from "react-router-dom";
-import { toast } from "react-toastify";
+import GetConfirmation from "./GetConfirmation";
 
 export default function Reviews({ restaurantData }) {
   const { user, role } = useAuth();
@@ -18,7 +19,10 @@ export default function Reviews({ restaurantData }) {
     return (
       <div className="flex flex-col gap-4">
         <p className="text-center text-black/60 font-semibold">
-          <Link to="/login" className="text-blue-500 hover:underline">Login</Link> to add a review.
+          <Link to="/login" className="text-blue-500 hover:underline">
+            Login
+          </Link>{" "}
+          to add a review.
         </p>
         {reviews.length > 0 ? <ReviewCards reviews={reviews} /> : null}
       </div>
@@ -62,6 +66,7 @@ function ReviewCardEdit({ review }) {
   const { id } = useParams();
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [isDelete, setIsDelete] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -73,6 +78,7 @@ function ReviewCardEdit({ review }) {
       queryClient.invalidateQueries({ queryKey: ["restaurant", id] });
       queryClient.invalidateQueries({ queryKey: ["all-restaurants"] });
       setIsEditing(false);
+      setIsDelete(false);
     },
     onError: (error) => {
       toast.error("Failed to delete review.");
@@ -81,7 +87,8 @@ function ReviewCardEdit({ review }) {
   });
 
   function submitDeleteReview() {
-    mutate();
+    // mutate();
+    setIsDelete(true);
   }
 
   return isEditing ? (
@@ -98,14 +105,21 @@ function ReviewCardEdit({ review }) {
             Edit
           </button>
           <button
-            className="flex gap-1 border border-none bg-red-600 px-5 py-1 rounded-xl text-white font-bold hover:bg-red-700"
+            className="flex gap-1 border border-none bg-red-600 px-5 py-1 rounded-xl text-white font-bold hover:bg-red-700 disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-50"
             onClick={submitDeleteReview}
-            disabled={isDeletePending}
+            disabled={isDeletePending || isDelete}
           >
             <Trash2 className="w-4" />
             Delete Review
           </button>
         </div>
+        {isDelete && (
+          <GetConfirmation
+            mutate={mutate}
+            setIsDelete={setIsDelete}
+            text="review"
+          />
+        )}
       </ReviewCard>
     </div>
   );
@@ -120,6 +134,7 @@ function ReviewCards({ reviews }) {
     </div>
   );
 }
+
 function ReviewCard({ review, children }) {
   return (
     <div className="flex flex-col border border-none rounded-md px-6 py-3 shadow-sm">

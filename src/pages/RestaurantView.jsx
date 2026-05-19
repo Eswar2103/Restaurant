@@ -7,7 +7,7 @@ import { FormRow, LoadingButton, RatingStars } from "./Utils";
 import AddReviewForm from "../components/AddReviewForm";
 import Reviews from "../components/Reviews";
 import AddRestaurantForm from "../components/AddRestaurantForm";
-import { SkeletonCard } from "../components/LOader";
+import { SkeletonCard } from "../components/Loader";
 
 function RestaurantView() {
   const { id } = useParams();

@@ -10,7 +10,7 @@ import {
   AuthSkeletonCard,
   RootLayoutSkeleton,
   SkeletonCard,
-} from "./components/LOader";
+} from "./components/Loader";
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const Home = lazy(() => import("./pages/Home"));
