@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import { Banner } from "./Utils";
 
 function RootLayout() {
   return (
@@ -39,6 +40,7 @@ function RootLayout() {
           </NavLink>
         </div>
       </nav> */}
+      <Banner />
       <RootNavbar />
       <div className="flex-1 my-15">
         <Outlet />
