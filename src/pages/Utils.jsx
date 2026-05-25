@@ -93,4 +93,28 @@ function RatingStars({ rating }) {
   );
 }
 
-export { FormRow, LoadingButton, RatingStars };
+function Banner() {
+  return (
+    <div className="flex justify-center mb-7">
+      <div className="border rounded-2xl px-5 py-2">
+        <p>
+          Test app built using{" "}
+          <span className="font-bold">
+            React, Vite, TailwindCSS, Tanstack React Query, React Router Dom,
+            Supabase
+          </span>
+        </p>
+        <a
+          className="flex justify-center uppercase text-blue-500 hover:text-blue-600 hover:underline font-bold"
+          href="https://github.com/Eswar2103/Restaurant"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Github Repo
+        </a>
+      </div>
+    </div>
+  );
+}
+
+export { FormRow, LoadingButton, RatingStars, Banner };

@@ -4,10 +4,12 @@ import { useAuth } from "../context/useAuth";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import Logout from "../components/Logout";
+import { Banner } from "./Utils";
 
 function AppLayout() {
   return (
     <div className="max-w-[1200px] w-full mx-auto px-4 min-h-screen flex flex-col mt-5">
+      <Banner />
       <Navbar />
       <div className="flex-1 flex justify-center py-10">
         <Outlet />
